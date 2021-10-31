@@ -29,7 +29,9 @@ class WildberriesscrapyItem(scrapy.Item):
     set_images = scrapy.Field()
     view360 = scrapy.Field()
     video = scrapy.Field()
-    # price data
+
+
+class PriceItem(scrapy.Item):
     current = scrapy.Field()
     original = scrapy.Field()
     sale_tag = scrapy.Field()
