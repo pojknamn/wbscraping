@@ -7,7 +7,7 @@ class WbspiderSpider(scrapy.Spider):
     name = 'WBSpider'
     page_number = 1
     allowed_domains = ['wildberries.ru']
-    start_urls = ['https://www.wildberries.ru/catalog/dom/dachniy-sezon/basseyny/naduvnye-basseyny']
+    start_urls = ["https://www.wildberries.ru/brands/crocs/all"]
 
     def parse(self, response):
         next_page_url = response.css("a.pagination__next::attr(href)").extract_first()
@@ -40,7 +40,7 @@ class WbspiderSpider(scrapy.Spider):
         prices["original"] = float(original_price.split(":")[-1])
         prices["sale_tag"] = "" if not sale else f"Скидка {sale}%"
         item["title"] = f"{item['title']}{f', {color}' if color else ''}"
-        item["stock"] = {"in_stock": True if not response.css("span.sold-out-product__text::text").extract() else False,
+        item["stock"] = {"in_stock": True if not response.css("p.sold-out-product__text.hide::text").extract() else False,
                          "count": 0}
         list360 = []
         video_url = response.css("meta[property='og:video']::attr(content)").extract_first()
@@ -56,7 +56,7 @@ class WbspiderSpider(scrapy.Spider):
         item["assets"] = {"main_image": response.css("meta[itemprop='image']::attr(content)")[0].extract(),
                           "set_images": response.css(".slide__content source::attr(srcset)").extract(),
                           "view360": list360,
-                          "video": ["" if not video_url else video_url]
+                          "video": [] if not video_url else [video_url,]
                           }
 
         meta = {"__description": description,
@@ -65,7 +65,7 @@ class WbspiderSpider(scrapy.Spider):
 
         for td in response.css("tr.product-params__row"):
             try:
-                col_key = td.css("span.product-params__cell-decor span::text")[0].extract()
+                col_key = td.css("span.product-params__cell-decor span::text")[0].extract().upper()
             except IndexError:
                 col_key = False
             try:
