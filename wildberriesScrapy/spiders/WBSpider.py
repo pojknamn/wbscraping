@@ -7,14 +7,12 @@ class WbspiderSpider(scrapy.Spider):
     name = 'WBSpider'
     page_number = 1
     allowed_domains = ['wildberries.ru']
-    start_urls = ['https://www.wildberries.ru/catalog/dom/dachniy-sezon/basseyny/naduvnye-basseyny'] #  ["https://www.wildberries.ru/brands/crocs/all"]
+    start_urls = ['https://www.wildberries.ru/catalog/dom/dachniy-sezon/basseyny/naduvnye-basseyny']
 
     def parse(self, response):
-        item_limit = 100
         next_page_url = response.css("a.pagination__next::attr(href)").extract_first()
         hrefs = response.css("a.product-card__main::attr(href)").extract()
         for link in hrefs:
-            time.sleep(1)
             item_link = response.urljoin(link)
             yield scrapy.Request(url=item_link, callback=self.parse_detail)
 
@@ -45,6 +43,7 @@ class WbspiderSpider(scrapy.Spider):
         item["stock"] = {"in_stock": True if not response.css("span.sold-out-product__text::text").extract() else False,
                          "count": 0}
         list360 = []
+        video_url = response.css("meta[property='og:video']::attr(content)").extract_first()
         try:
             description = response.css("meta[itemprop='description']::attr(content)")[0].extract()
         except IndexError:
@@ -57,7 +56,7 @@ class WbspiderSpider(scrapy.Spider):
         item["assets"] = {"main_image": response.css("meta[itemprop='image']::attr(content)")[0].extract(),
                           "set_images": response.css(".slide__content source::attr(srcset)").extract(),
                           "view360": list360,
-                          "video": [response.css("meta[property='og:video']::attr(content)").extract_first(),]
+                          "video": ["" if not video_url else video_url]
                           }
 
         meta = {"__description": description,
