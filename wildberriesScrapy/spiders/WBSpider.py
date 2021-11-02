@@ -7,7 +7,7 @@ class WbspiderSpider(scrapy.Spider):
     name = 'WBSpider'
     page_number = 1
     allowed_domains = ['wildberries.ru']
-    start_urls = ["https://www.wildberries.ru/brands/crocs/all"]
+    start_urls = ["https://www.wildberries.ru/brands/vse-dlya-doma/shtory-i-aksessuary"]
 
     def parse(self, response):
         next_page_url = response.css("a.pagination__next::attr(href)").extract_first()
@@ -33,12 +33,12 @@ class WbspiderSpider(scrapy.Spider):
         item["RPC"] = script_text.re_first(r'"imtId":[0-9]*').split(":")[-1]
         item["url"] = response.urljoin(response.css("meta[itemprop='url']::attr(content)")[0].extract())
         item["title"] = response.css('meta[itemprop="name"]::attr(content)').extract_first()
-        item["marketing_tags"] = [i for i in response.css("a.spec-action__link::text").extract()]
+        item["marketing_tags"] = list({i for i in response.css("a.spec-action__link::text").extract()})
         item["brand"] = response.css('meta[itemprop="brand"]::attr(content)')[0].extract()
         item["section"] = list(set([i for i in response.css("span[itemprop='title']::text").extract()]))
         prices["current"] = float(current_price.split(":")[-1])
         prices["original"] = float(original_price.split(":")[-1])
-        prices["sale_tag"] = "" if not sale else f"Скидка {sale}%"
+        prices["sale_tag"] = "" if not sale or int(sale) == 0  else f"Скидка {sale}%"
         item["title"] = f"{item['title']}{f', {color}' if color else ''}"
         item["stock"] = {"in_stock": True if not response.css("p.sold-out-product__text.hide::text").extract() else False,
                          "count": 0}

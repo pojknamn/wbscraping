@@ -12,7 +12,7 @@ BOT_NAME = 'wildberriesScrapy'
 SPIDER_MODULES = ['wildberriesScrapy.spiders']
 NEWSPIDER_MODULE = 'wildberriesScrapy.spiders'
 
-
+LOG_LEVEL = "ERROR"
 
 # Obey robots.txt rules
 # ROBOTSTXT_OBEY = True
